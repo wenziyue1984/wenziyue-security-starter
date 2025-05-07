@@ -70,4 +70,13 @@
         </plugins>
     </build>
 
+    <!-- 配置 GitHub Packages 仓库 -->
+    <distributionManagement>
+        <repository>
+            <id>github-security</id>
+            <name>github-mybatis-plus</name>
+            <url>https://maven.pkg.github.com/wenziyue1984/wenziyue-security-starter</url>
+        </repository>
+    </distributionManagement>
+
 </project>

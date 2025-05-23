@@ -50,21 +50,37 @@ wenziyue-security-starter 是一个基于 Spring Security 封装的通用安全�
 
 ### **1. 引入依赖**
 
+首先在settings.xml中添加以下认证信息
+```xml
+<server>
+    <id>wenziyue-security</id>
+    <username>你的GitHub用户名</username>
+    <password>你的GitHub Token（建议只赋予 read:packages 权限）</password>
+</server>
+```
 
+再在 `pom.xml` 中添加 GitHub 仓库地址：
 
-
-
-将该 starter 发布到 GitHub Packages 或私有 Maven 仓库后，在你的业务项目中添加依赖：
+```xml
+<!-- pom.xml 中添加仓库地址（id 要与上面保持一致） -->
+<repositories>
+    <repository>
+        <id>wenziyue-security</id>
+        <url>https://maven.pkg.github.com/wenziyue1984/wenziyue-security-starter</url>
+    </repository>
+</repositories>
+```
+然后引入依赖：
 
 ```xml
 <dependency>
-  <groupId>com.wenziyue</groupId>
-  <artifactId>wenziyue-security-starter</artifactId>
-  <version>1.0.0</version>
+    <groupId>com.wenziyue</groupId>
+    <artifactId>wenziyue-security-starter</artifactId>
+    <version>1.0.0（请使用最新版本）</version>
 </dependency>
 ```
 
-
+> 💡 注意：你需要在 Maven 的 `settings.xml` 中配置 GitHub Token 授权，才能访问私有或 GitHub Packages 的依赖。
 
 ### **2. 自动启用**
 

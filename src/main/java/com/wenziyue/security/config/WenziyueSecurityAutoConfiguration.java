@@ -9,9 +9,9 @@ import com.wenziyue.security.service.impl.DefaultLoginService;
 import com.wenziyue.security.utils.JwtUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
@@ -45,7 +45,8 @@ public class WenziyueSecurityAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = "loginController") //只能
+    @ConditionalOnProperty(prefix = "wenziyue.security", name   = "default-login-enabled", havingValue = "true", matchIfMissing = false)
     public LoginController loginController(
             LoginService loginService,
             JwtUtils jwtUtils,

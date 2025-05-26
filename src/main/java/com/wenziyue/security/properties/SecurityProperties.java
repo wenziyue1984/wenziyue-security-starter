@@ -2,7 +2,6 @@ package com.wenziyue.security.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -20,12 +19,7 @@ public class SecurityProperties {
     /**
      * 是否启用默认的 /login 接口
      */
-    private Boolean enableDefaultLogin = true;
-
-    /**
-     * 登录路径（仅在启用默认登录接口时生效）
-     */
-    private String loginPath = "/login";
+    private Boolean defaultLoginEnabled = false;
 
     /**
      * JWT 的请求头名称

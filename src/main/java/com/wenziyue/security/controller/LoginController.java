@@ -7,7 +7,6 @@ import com.wenziyue.security.properties.SecurityProperties;
 import com.wenziyue.security.service.LoginService;
 import com.wenziyue.security.service.RefreshCacheByRefreshToken;
 import com.wenziyue.security.utils.JwtUtils;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +57,14 @@ public class LoginController {
 
         // 校验 token 是否过期
         if (jwtUtils.isTokenExpired(token)) {
-            throw new RuntimeException("Token 已过期，不能刷新，请重新登录");
+            throw new RuntimeException("token 已过期，不能刷新，请重新登录");
+        }
+
+        // 检测缓存中是否存在此token（如果有实现的话）
+        if (refreshCacheByRefreshToken != null) {
+            if (!refreshCacheByRefreshToken.isOldTokenExist(token)) {
+                throw new RuntimeException("token 已失效，不能刷新，请重新登录");
+            }
         }
 
         // 获取 userId 并生成新 token

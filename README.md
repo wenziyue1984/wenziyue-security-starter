@@ -66,6 +66,7 @@ wenziyue:
       - "/user/**"
 ```
 关于白名单，默认放行以下接口：
+```yaml
 "/login",
 "/refresh",
 "/register",
@@ -75,6 +76,7 @@ wenziyue:
 "/v3/api-docs/**",
 "/swagger-ui.html",
 "/webjars/swagger-ui/**"
+```
 
 ------
 

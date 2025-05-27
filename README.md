@@ -72,7 +72,9 @@ wenziyue:
 "/doc.html",
 "/swagger-ui/**",
 "/swagger-resources/**",
-"/v3/api-docs/**"
+"/v3/api-docs/**",
+"/swagger-ui.html",
+"/webjars/swagger-ui/**"
 
 ------
 

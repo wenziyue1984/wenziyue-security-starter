@@ -54,7 +54,9 @@ public class SecurityProperties {
                 "/doc.html",
                 "/swagger-ui/**",
                 "/swagger-resources/**",
-                "/v3/api-docs/**"
+                "/v3/api-docs/**",
+                "/swagger-ui.html",
+                "/webjars/swagger-ui/**"
         );
         // 合并默认路径（避免重复添加）
         for (String path : defaultWhiteList) {

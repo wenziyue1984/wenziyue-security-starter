@@ -23,7 +23,6 @@ import java.util.Collections;
 @Configuration
 @EnableConfigurationProperties(SecurityProperties.class)
 @EnableWebSecurity
-//@ComponentScan(basePackages = "com.wenziyue.security")
 public class WenziyueSecurityAutoConfiguration {
 
     @Bean

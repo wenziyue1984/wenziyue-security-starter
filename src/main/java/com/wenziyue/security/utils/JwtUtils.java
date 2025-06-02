@@ -6,7 +6,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Date;
 
@@ -14,14 +13,13 @@ import java.util.Date;
  * @author wenziyue
  */
 @NoArgsConstructor
-//@RequiredArgsConstructor
 @AllArgsConstructor
 public class JwtUtils {
 
     private SecurityProperties properties;
 
     public String generateToken(String userId) {
-        return generateToken(userId, properties.getJwt().getExpiration(), properties.getJwt().getSecret());
+        return generateToken(userId, properties.getExpire(), properties.getJwtSecret());
     }
 
     /**
@@ -52,7 +50,7 @@ public class JwtUtils {
 
     private Claims getClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(properties.getJwt().getSecret())
+                .setSigningKey(properties.getJwtSecret())
                 .parseClaimsJws(token)
                 .getBody();
     }
@@ -60,4 +58,5 @@ public class JwtUtils {
     public long getExpirationRemaining(String token) {
         return getClaims(token).getExpiration().getTime() - System.currentTimeMillis();
     }
+
 }

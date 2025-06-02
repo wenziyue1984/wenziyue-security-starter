@@ -1,5 +1,6 @@
 package com.wenziyue.security.filter;
 
+import com.wenziyue.security.properties.SecurityProperties;
 import com.wenziyue.security.service.UserDetailsServiceById;
 import com.wenziyue.security.utils.JwtUtils;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -26,10 +27,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
     private final UserDetailsServiceById userDetailsServiceById;
+    private final SecurityProperties securityProperties;
 
-    public JwtAuthenticationFilter(JwtUtils jwtUtils, UserDetailsServiceById userDetailsServiceById) {
+    public JwtAuthenticationFilter(JwtUtils jwtUtils, UserDetailsServiceById userDetailsServiceById, SecurityProperties securityProperties) {
         this.jwtUtils = jwtUtils;
         this.userDetailsServiceById = userDetailsServiceById;
+        this.securityProperties = securityProperties;
     }
 
     @Override
@@ -57,9 +60,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // ==== 添加续期逻辑 ====
                     long remain = jwtUtils.getExpirationRemaining(token);
                     // 如果 token 剩余时间 < 一天，生成新 token 返回给前端
-                    if (remain < 24 * 60 * 60 * 1000) {
+                    if (remain < securityProperties.getRefreshBeforeExpiration()) {
                         String newToken = jwtUtils.generateToken(userId);
-                        response.setHeader("X-Refresh-Token", newToken);
+                        response.setHeader(securityProperties.getRefreshTokenHeader(), newToken);
                     }
                 }
             } catch (ExpiredJwtException e) {
@@ -78,9 +81,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
-        String bearer = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
-            return bearer.substring(7); // 去掉 "Bearer "
+        String bearer = request.getHeader(securityProperties.getTokenHeader());
+        if (StringUtils.hasText(bearer) && bearer.startsWith(securityProperties.getTokenPrefix())) {
+            return bearer.substring(securityProperties.getTokenPrefix().length()); // 去掉 "Bearer "
         }
         return null;
     }

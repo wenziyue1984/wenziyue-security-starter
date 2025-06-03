@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(token)) {
             try {
                 // 3. 从 token 中获取用户信息
-                String userId = jwtUtils.getUserIdFromToken(token);
+                String userId = jwtUtils.getUserIdFromToken(token); // 这里会校验jwt是否过期
                 if (StringUtils.hasText(userId)) {
                     // 4. 构造认证对象
                     UserDetails userDetails = userDetailsServiceById.loadUserById(userId);
@@ -59,7 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     // ==== 添加续期逻辑 ====
                     long remain = jwtUtils.getExpirationRemaining(token);
-                    // 如果 token 剩余时间 < 一天，生成新 token 返回给前端
+                    // 如果 token 剩余时间不足，生成新 token 返回给前端
                     if (remain < securityProperties.getRefreshBeforeExpiration()) {
                         String newToken = jwtUtils.generateToken(userId);
                         response.setHeader(securityProperties.getRefreshTokenHeader(), newToken);

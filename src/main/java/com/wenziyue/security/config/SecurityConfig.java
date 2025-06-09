@@ -1,6 +1,7 @@
 package com.wenziyue.security.config;
 
-import com.wenziyue.security.service.UserDetailsServiceById;
+import com.wenziyue.security.service.RefreshCacheByRefreshToken;
+import com.wenziyue.security.service.UserDetailsServiceByIdOrToken;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,17 +27,19 @@ public class SecurityConfig {
 
     private final SecurityProperties securityProperties;
     private final JwtUtils jwtUtils;
-    private final UserDetailsServiceById userDetailsServiceById;
+    private final UserDetailsServiceByIdOrToken userDetailsServiceByIdOrToken;
+    private final RefreshCacheByRefreshToken refreshCacheByRefreshToken;
 
-    public SecurityConfig(SecurityProperties securityProperties, JwtUtils jwtUtils,  UserDetailsServiceById userDetailsServiceById) {
+    public SecurityConfig(SecurityProperties securityProperties, JwtUtils jwtUtils, UserDetailsServiceByIdOrToken userDetailsServiceByIdOrToken, RefreshCacheByRefreshToken refreshCacheByRefreshToken) {
         this.securityProperties = securityProperties;
         this.jwtUtils = jwtUtils;
-        this.userDetailsServiceById = userDetailsServiceById;
+        this.userDetailsServiceByIdOrToken = userDetailsServiceByIdOrToken;
+        this.refreshCacheByRefreshToken = refreshCacheByRefreshToken;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtils, userDetailsServiceById, securityProperties);
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtils, userDetailsServiceByIdOrToken, securityProperties, refreshCacheByRefreshToken);
 
         http
                 .csrf().disable() // 禁用 csrf

@@ -4,9 +4,10 @@ import com.wenziyue.security.controller.LoginController;
 import com.wenziyue.security.properties.SecurityProperties;
 import com.wenziyue.security.service.LoginService;
 import com.wenziyue.security.service.RefreshCacheByRefreshToken;
-import com.wenziyue.security.service.UserDetailsServiceById;
+import com.wenziyue.security.service.UserDetailsServiceByIdOrToken;
 import com.wenziyue.security.service.impl.DefaultLoginService;
 import com.wenziyue.security.utils.JwtUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,6 +21,7 @@ import java.util.Collections;
 /**
  * @author wenziyue
  */
+@Slf4j
 @Configuration
 @EnableConfigurationProperties(SecurityProperties.class)
 @EnableWebSecurity
@@ -32,8 +34,9 @@ public class WenziyueSecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public UserDetailsServiceById defaultUserDetailsServiceById() {
-        return userId -> {
+    public UserDetailsServiceByIdOrToken defaultUserDetailsServiceById() {
+        return (userId, token) -> {
+            log.info("UserDetailsServiceById默认实现，只返回 userId，无权限信息");
             // 默认实现只返回 userId，无权限信息
             return new org.springframework.security.core.userdetails.User(
                     String.valueOf(userId),
@@ -41,6 +44,12 @@ public class WenziyueSecurityAutoConfiguration {
                     Collections.emptyList()
             );
         };
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RefreshCacheByRefreshToken defaultRefreshCacheByRefreshToken() {
+        return (oldToken, newToken) -> log.info("RefreshCacheByRefreshToken默认实现");
     }
 
     @Bean
@@ -57,10 +66,9 @@ public class WenziyueSecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SecurityConfig securityConfig(
-            SecurityProperties securityProperties,
-            JwtUtils jwtUtils,
-            UserDetailsServiceById userDetailsServiceById) {
-        return new SecurityConfig(securityProperties, jwtUtils, userDetailsServiceById);
+            SecurityProperties securityProperties, JwtUtils jwtUtils,
+            UserDetailsServiceByIdOrToken userDetailsServiceByIdOrToken, RefreshCacheByRefreshToken refreshCacheByRefreshToken) {
+        return new SecurityConfig(securityProperties, jwtUtils, userDetailsServiceByIdOrToken, refreshCacheByRefreshToken);
     }
 
     @Bean

@@ -34,12 +34,12 @@ public class SecurityProperties {
     /**
      * JWT 前缀（如："Bearer "）
      */
-    private String tokenPrefix = "Bearer ";
+    private String tokenPrefix = "Bearer";
 
     /**
      * token的过期时间（毫秒），默认7天
      */
-    private Long expire = 7 * 24 * 60 * 60 * 1000L;
+    private Long expire = 7 * 24 * 60 * 60 * 1000L;;
 
     /**
      * 还剩多少时间开始刷新token（毫秒）， 默认1天
@@ -58,6 +58,15 @@ public class SecurityProperties {
 
     @PostConstruct
     public void init() {
+        // 默认token过期时间，7天（毫秒）
+        if (expire == null) {
+            expire = 7 * 24 * 60 * 60 * 1000L;
+        }
+        // 默认刷新token时间，1天（毫秒）
+        if (refreshBeforeExpiration == null) {
+            refreshBeforeExpiration = 24 * 60 * 60 * 1000L;
+        }
+        // 校验参数
         validate();
         // 默认白名单路径
         List<String> defaultWhiteList = Arrays.asList(

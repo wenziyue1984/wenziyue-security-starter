@@ -45,35 +45,28 @@ public class LoginController {
 
     @PostMapping("/refresh")
     public String refreshToken(HttpServletRequest request) {
-        // 从请求头中拿 token
+        // 从请求头中拿 oldToken
         String authHeader = request.getHeader(securityProperties.getTokenHeader());
         String tokenPrefix = securityProperties.getTokenPrefix();
 
         if (authHeader == null || !authHeader.startsWith(tokenPrefix)) {
-            throw new RuntimeException("无效的 token");
+            throw new RuntimeException("无效的 oldToken");
         }
 
-        String token = authHeader.substring(tokenPrefix.length());
+        String oldToken = authHeader.substring(tokenPrefix.length());
 
-        // 校验 token 是否过期
-        if (jwtUtils.isTokenExpired(token)) {
-            throw new RuntimeException("token 已过期，不能刷新，请重新登录");
+        // 校验 oldToken 是否过期
+        if (jwtUtils.isTokenExpired(oldToken)) {
+            throw new RuntimeException("oldToken 已过期，不能刷新，请重新登录");
         }
 
-        // 检测缓存中是否存在此token（如果有实现的话）
-        if (refreshCacheByRefreshToken != null) {
-            if (!refreshCacheByRefreshToken.isOldTokenExist(token)) {
-                throw new RuntimeException("token 已失效，不能刷新，请重新登录");
-            }
-        }
-
-        // 获取 userId 并生成新 token
-        String userId = jwtUtils.getUserIdFromToken(token);
+        // 获取 userId 并生成新 oldToken
+        String userId = jwtUtils.getUserIdFromToken(oldToken);
         String newToken = jwtUtils.generateToken(userId);
 
         // 更新缓存（如果有实现的话）
         if (refreshCacheByRefreshToken != null) {
-            refreshCacheByRefreshToken.refreshCacheByRefreshToken(token);
+            refreshCacheByRefreshToken.refreshCacheByRefreshToken(oldToken, newToken);
         }
 
         return newToken;

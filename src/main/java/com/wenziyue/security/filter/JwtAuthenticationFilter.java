@@ -1,7 +1,8 @@
 package com.wenziyue.security.filter;
 
 import com.wenziyue.security.properties.SecurityProperties;
-import com.wenziyue.security.service.UserDetailsServiceById;
+import com.wenziyue.security.service.RefreshCacheByRefreshToken;
+import com.wenziyue.security.service.UserDetailsServiceByIdOrToken;
 import com.wenziyue.security.utils.JwtUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -26,13 +27,16 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
-    private final UserDetailsServiceById userDetailsServiceById;
+    private final UserDetailsServiceByIdOrToken userDetailsServiceByIdOrToken;
     private final SecurityProperties securityProperties;
+    private final RefreshCacheByRefreshToken refreshCacheByRefreshToken;
 
-    public JwtAuthenticationFilter(JwtUtils jwtUtils, UserDetailsServiceById userDetailsServiceById, SecurityProperties securityProperties) {
+    public JwtAuthenticationFilter(JwtUtils jwtUtils, UserDetailsServiceByIdOrToken userDetailsServiceByIdOrToken,
+                                   SecurityProperties securityProperties, RefreshCacheByRefreshToken refreshCacheByRefreshToken) {
         this.jwtUtils = jwtUtils;
-        this.userDetailsServiceById = userDetailsServiceById;
+        this.userDetailsServiceByIdOrToken = userDetailsServiceByIdOrToken;
         this.securityProperties = securityProperties;
+        this.refreshCacheByRefreshToken = refreshCacheByRefreshToken;
     }
 
     @Override
@@ -41,16 +45,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         // 1. 从请求头中取出 Authorization: Bearer xxx
-        String token = getTokenFromRequest(request);
+        String oldToken = getTokenFromRequest(request);
 
-        // 2. 校验 token 合法性
-        if (StringUtils.hasText(token)) {
+        // 2. 校验 oldToken 合法性
+        if (StringUtils.hasText(oldToken)) {
             try {
-                // 3. 从 token 中获取用户信息
-                String userId = jwtUtils.getUserIdFromToken(token); // 这里会校验jwt是否过期
+                // 3. 从 oldToken 中获取用户信息
+                String userId = jwtUtils.getUserIdFromToken(oldToken); // 这里会校验jwt是否过期
                 if (StringUtils.hasText(userId)) {
                     // 4. 构造认证对象
-                    UserDetails userDetails = userDetailsServiceById.loadUserById(userId);
+                    UserDetails userDetails = userDetailsServiceByIdOrToken.loadUserByUserIdOrToken(userId, oldToken);
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
@@ -58,11 +62,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
                     // ==== 添加续期逻辑 ====
-                    long remain = jwtUtils.getExpirationRemaining(token);
-                    // 如果 token 剩余时间不足，生成新 token 返回给前端
+                    long remain = jwtUtils.getExpirationRemaining(oldToken);
+                    // 如果 oldToken 剩余时间不足，生成新 oldToken 返回给前端
                     if (remain < securityProperties.getRefreshBeforeExpiration()) {
                         String newToken = jwtUtils.generateToken(userId);
                         response.setHeader(securityProperties.getRefreshTokenHeader(), newToken);
+                        // 刷新token的时候也更新缓存
+                        refreshCacheByRefreshToken.refreshCacheByRefreshToken(oldToken, newToken);
                     }
                 }
             } catch (ExpiredJwtException e) {
@@ -83,7 +89,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String getTokenFromRequest(HttpServletRequest request) {
         String bearer = request.getHeader(securityProperties.getTokenHeader());
         if (StringUtils.hasText(bearer) && bearer.startsWith(securityProperties.getTokenPrefix())) {
-            return bearer.substring(securityProperties.getTokenPrefix().length()); // 去掉 "Bearer "
+            return bearer.substring(securityProperties.getTokenPrefix().length() + 1); // 去掉 "Bearer ",+1是给空格的长度
         }
         return null;
     }

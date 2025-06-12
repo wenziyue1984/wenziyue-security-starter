@@ -63,8 +63,8 @@ wenziyue:
     default-login-enabled: false  # 是否开启默认登录接口，默认false（默认登录接口只适用于简单的demo或者测试使用，请勿用于生产环境）
     token-header: Authorization  # JWT 的请求头名称，默认 Authorization
     refreshTokenHeader: X-Refresh-Token  # 刷新token时返回的header头
-    expire: 604800000 # token过期时间，毫秒，默认7天
-    refresh-before-expiration: 86400000  # 还剩多少时间刷新token时间，毫秒，默认1天
+    expire: 604800 # token过期时间，秒，默认7天
+    refresh-before-expiration: 86400  # 还剩多少时间刷新token时间，秒，默认1天
     white-list:  # 白名单，不进行权限校验
       - "/user/**"
 ```

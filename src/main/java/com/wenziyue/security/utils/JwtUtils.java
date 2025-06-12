@@ -29,7 +29,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(userId)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000)) // *1000 秒转为毫秒
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
@@ -55,8 +55,11 @@ public class JwtUtils {
                 .getBody();
     }
 
+    /**
+     * 获取 token 剩余有效时长（秒）
+     */
     public long getExpirationRemaining(String token) {
-        return getClaims(token).getExpiration().getTime() - System.currentTimeMillis();
+        return (getClaims(token).getExpiration().getTime() - System.currentTimeMillis()) / 1000;
     }
 
 }

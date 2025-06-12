@@ -39,12 +39,12 @@ public class SecurityProperties {
     /**
      * token的过期时间（毫秒），默认7天
      */
-    private Long expire = 7 * 24 * 60 * 60 * 1000L;;
+    private Long expire = 7 * 24 * 60 * 60L;
 
     /**
      * 还剩多少时间开始刷新token（毫秒）， 默认1天
      */
-    private Long refreshBeforeExpiration = 24 * 60 * 60 * 1000L;
+    private Long refreshBeforeExpiration = 24 * 60 * 60L;
 
     /**
      * JWT 密钥
@@ -60,11 +60,11 @@ public class SecurityProperties {
     public void init() {
         // 默认token过期时间，7天（毫秒）
         if (expire == null) {
-            expire = 7 * 24 * 60 * 60 * 1000L;
+            expire = 7 * 24 * 60 * 60L;
         }
         // 默认刷新token时间，1天（毫秒）
         if (refreshBeforeExpiration == null) {
-            refreshBeforeExpiration = 24 * 60 * 60 * 1000L;
+            refreshBeforeExpiration = 24 * 60 * 60L;
         }
         // 校验参数
         validate();
